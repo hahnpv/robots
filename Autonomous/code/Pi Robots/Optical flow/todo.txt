@@ -1,0 +1,2 @@
+-add matlab scripts off work laptop
+-add invocation to avlib or w/e to concatenate h264 and encapsulate in mp4

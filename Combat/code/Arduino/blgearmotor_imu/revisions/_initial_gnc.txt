@@ -1,0 +1,152 @@
+/// initial gnc
+#include <Servo.h>
+
+// I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
+// for both classes must be in the include path of your project
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
+
+// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
+// is used in I2Cdev.h
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+
+MPU6050 mpu;
+
+#define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
+#define C_DEG 180. / PI   // C_DEG
+
+// MPU DMP control/status vars
+bool dmpReady = false;  // set true if DMP init was successful
+uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount;     // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
+
+// orientation/motion vars
+Quaternion q;           // [w, x, y, z]         quaternion container
+VectorFloat gravity;    // [x, y, z]            gravity vector
+float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+//float euler[3];         // [psi, theta, phi]    Euler angle container
+VectorInt16 gyro;
+
+Servo m0;
+Servo m1;
+
+bool debug = true;
+unsigned long mill = 0;
+
+void setup() {
+ 
+  if(debug) Serial.begin(115200);
+
+  // Configure MPU
+  mpu_setup();
+
+  m0.attach(5 );
+  m1.attach(6 );
+  
+  if(debug) Serial.println("writing...");
+  m0.write(0);  m1.write(0);
+  delay(1000); //delay 1 second,  some speed controllers may need longer
+  m0.write(90);  m1.write(90);
+  delay(1000); //delay 1 second,  some speed controllers may need longer
+  m0.write(0);  m1.write(0);
+  delay(1000); //delay 1 second,  some speed controllers may need longer
+  if(debug) Serial.println("done");
+
+  pinMode(13, OUTPUT);
+  
+  if(debug) Serial.println("Done with setup");
+  unsigned long mill = millis();
+}
+
+static int minPWM = 1027;     // by inspection
+static int maxPWM = 1985;     // by inspection
+float midPWM      = 1488.;    // by inspection
+float steeringGain = 0.5;
+float expo = 1.;           // expo coefficient
+int   limit = 0;             // travel limit TODO convert from angle to ms
+float yawP = 0.1;
+float yawI = 0.01;
+float integral = 0;
+float integralCap = 25;
+
+void loop() {
+  if (!dmpReady) return;
+  mpu_block();
+  if (!mpu_overflow())
+  {
+
+    int  steerRaw    = pulseIn( 7, HIGH, 25000); // 20000 occasionally has zeros -> moved this to expose PWM pin
+    int  throttleRaw = pulseIn( 8, HIGH, 25000);
+    bool imuMode     = pulseIn( 9, HIGH, 25000) > 1500;
+  
+    int steerStick    = map(steerRaw,    minPWM, maxPWM, midPWM*(1-steeringGain), midPWM*(1+steeringGain));   // throttle, percent
+    int throttleStick = throttleRaw; // map(throttleRaw, minPWM, maxPWM, minPWM, maxPWM);   // steer, percent
+  
+    int leftCmd  = constrain( throttleStick + (midPWM - steerStick), minPWM+limit, maxPWM-limit); 
+    int rightCmd = constrain( throttleStick - (midPWM - steerStick), minPWM+limit, maxPWM-limit); 
+  
+    float leftExpo  = (((float)leftCmd) -midPWM)/midPWM;
+    float rightExpo = (((float)rightCmd)-midPWM)/midPWM;
+  
+    leftExpo  =  signf(leftExpo)  * pow( abs(leftExpo),  expo);
+    rightExpo =  signf(rightExpo) * pow( abs(rightExpo), expo);
+  
+    leftCmd  = leftExpo  * (494.-(float)limit) + midPWM;
+    rightCmd = rightExpo * (494.-(float)limit) + midPWM;    // TODO get rid of magic numbers
+    
+  //  if(debug) { Serial.print(leftExpo);Serial.print(" ");Serial.print(rightExpo);Serial.println("Expo"); }
+    
+    if ((steerRaw==0) || (throttleRaw==0)) // inhibit if we lost signal
+    {
+      m0.writeMicroseconds(midPWM);
+      m1.writeMicroseconds(midPWM);
+  //    if (debug) Serial.println("Remove before flight inhibit");
+    } else { 
+      if (!imuMode) 
+      {
+        // do nothing
+        digitalWrite(13, LOW);   // turn the LED on (HIGH is the voltage level)
+      } else {
+        digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+
+        // use guided solution
+        /// euler angles exist from mpu_overflow
+        // gyro_z is positive right hand rule (z is up 
+        Serial.print("YPR: ");
+        Serial.print(  ypr[0]*C_DEG);Serial.print(" ");Serial.println(gyro.z);
+        integral += (float)(gyro.z * yawI);
+        integral = constrain(integral, -integralCap, integralCap);
+        leftCmd  -= (int)  (gyro.z * yawP) + (int)integral;
+        rightCmd += (int)  (gyro.z * yawP) + (int)integral;
+      }
+      m0.writeMicroseconds(leftCmd);
+      m1.writeMicroseconds(rightCmd);   
+    }
+  
+    if (debug) 
+    {
+  /*     Serial.print("Mode ");Serial.println(imuMode);
+       Serial.print("L: ");Serial.print(leftCmd); Serial.print(" ");Serial.print(steerStick); Serial.print(" ");Serial.print(steerRaw); Serial.println(" steer ");  // throttle
+       Serial.print("R: ");Serial.print(rightCmd);Serial.print(" ");Serial.print(throttleStick);Serial.print(" ");Serial.print(throttleRaw);Serial.println(" throttle ");  // elevator
+       Serial.print("Loop time: ");Serial.println(millis() - mill);
+  */  }
+    mill = millis();
+  }
+}
+
+static inline float signf(float val) {
+ if (val < 0) return -1.;
+ if (val==0) return 0.;
+ return 1.;
+}
+
+float mapf(long x, long in_min, long in_max, long out_min, long out_max)
+{
+ return (float)(x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min;
+}
