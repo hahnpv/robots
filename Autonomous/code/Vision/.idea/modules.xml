@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/Documents/PROJECTS/robots/Autonomous/code/Vision/.idea/Autonomy.iml" filepath="$USER_HOME$/Documents/PROJECTS/robots/Autonomous/code/Vision/.idea/Autonomy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Vision.iml" filepath="$PROJECT_DIR$/.idea/Vision.iml" />
     </modules>
   </component>
 </project>

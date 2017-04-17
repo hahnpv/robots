@@ -13,7 +13,7 @@ from autonomy.vision import histogram as hist
 cv2.namedWindow("image")
 cv2.setMouseCallback("image", io.rect_grab)
 
-my_camera = cv2.VideoCapture('C:/Users/phahn/Desktop/rumble2.mp4')
+my_camera = cv2.VideoCapture('C:/Users/phahn/Desktop/bodacious.mp4')
 time.sleep(2)
 success, image = my_camera.read()
 refresh = True
@@ -38,14 +38,26 @@ while (True):
         cv2.grabCut(img, mask, refRect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)
         mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
         # TODO spinner blur grabs more background than I'd like - in that case you need to erode before histogram
+        # TODO add option to take entire rect for histogram (key toggle grabcut off/on)
         # hue+sat better than just hue. hue+sat+val occluding everything. not sure if bug
         gcimg = img * mask2[:, :, np.newaxis]
         print img.shape[:2]
         cv2.imshow('grabcut', gcimg)
         mask3 = np.where((mask2==1), 255,0).astype('uint8')
+
         cv2.imshow('mask', mask3)
-        roihist = hist.histogram(img,mask3) # TODO you are histogramming the entire square!!!!
-        cv2.imshow("Histogram",cv2.dilate(roihist,np.ones((2,2))))      # dilate to make it a bit more readable
+        roihist = hist.histogram(img,mask3)
+
+        # TODO your roihist is being treated like a binary mask below shouldnt it be a gradient?
+        # todo try plotting in numpy to visualize better as a colormap
+
+        # Eroding and dilating the histogram gets rid of a lot of the 'noise'
+        # TODO maybe apply a smoothing kernel then threshold instead? spread signal around then remove weak signal
+        # TODO this makes everything no worse or better
+        roihist = cv2.erode(roihist, np.ones((2,2)))
+        roihist = cv2.dilate(roihist, np.ones((8,8)))
+
+        cv2.imshow("Histogram",roihist)      # dilate to make it a bit more readable
         print np.max(roihist)
         haveHistogram = True
 
@@ -60,12 +72,12 @@ while (True):
         '''
 
             # H S V
-        res = cv2.bitwise_and(img,thresh)
+        res = cv2.bitwise_and(img, thresh)
         lower_range = np.array([0, 128,0])           # get rid of shiny things
         upper_range = np.array([180, 256, 256])    # TODO make this a parameter and show red square on histogram to warn
         hsv_res = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_res, lower_range, upper_range)
-        mask = cv2.dilate(mask, np.ones((20,20)))
+#        mask = cv2.dilate(mask, np.ones((20,20)))
         res = cv2.bitwise_and(res, res, mask=mask)
 #        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, np.ones((5,5)))
         cv2.imshow('backproject_val_threshold', res)
