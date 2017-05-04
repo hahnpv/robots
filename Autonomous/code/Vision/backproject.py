@@ -6,6 +6,15 @@ import numpy as np
 from autonomy.util import io
 from autonomy.vision import histogram as hist
 
+# CONFIGURATION
+useCamshift = False
+hsvComponents = [0, 1]         # [0], [0, 1]
+hsvMaxes      = [180, 255]       # [180], [180, 255] TODO check this param and see what its for seems redundant
+hsvRanges     = [0, 180, 0, 255]    # [0, 180], [0, 180, 0, 255]
+# Camshift termination criteria, either 10 iteration or move by atleast 1 pt
+term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
+
+
 # crib off of hist_finder for program structure
 # http://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_histograms/py_histogram_backprojection/py_histogram_backprojection.html#histogram-backprojection
 # TODO try doing kmeans? small area might compute quick enough for pre-fight check? otherwise still useful offline
@@ -46,7 +55,7 @@ while (True):
         mask3 = np.where((mask2==1), 255,0).astype('uint8')
 
         cv2.imshow('mask', mask3)
-        roihist = hist.histogram(img,mask3)
+        roihist = hist.histogram(img,mask3,hsvComponents,hsvRanges,hsvMaxes)
 
         # TODO your roihist is being treated like a binary mask below shouldnt it be a gradient?
         # todo try plotting in numpy to visualize better as a colormap
@@ -60,9 +69,10 @@ while (True):
         cv2.imshow("Histogram",roihist)      # dilate to make it a bit more readable
         print np.max(roihist)
         haveHistogram = True
+        track_window = refRect
 
     if haveHistogram:
-        thresh = hist.backproject(cv2.cvtColor(img,cv2.COLOR_BGR2HSV),roihist)
+        thresh = hist.backproject(cv2.cvtColor(img,cv2.COLOR_BGR2HSV),roihist,hsvComponents,hsvRanges)
 
         '''
         TODO
@@ -81,6 +91,17 @@ while (True):
         res = cv2.bitwise_and(res, res, mask=mask)
 #        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, np.ones((5,5)))
         cv2.imshow('backproject_val_threshold', res)
+
+        if useCamshift:
+            '''
+            something weird w/thresh?
+            '''
+            success, track_window = cv2.CamShift(thresh, track_window, term_crit)
+            # Draw it on image
+            pts = cv2.boxPoints(success)
+            print success
+            pts = np.int0(pts)
+            img2 = cv2.polylines(img, [pts], True, 255, 2)
 
     if io.mousing:
         cv2.rectangle(img, io.refPt, io.refEnd, (0, 255, 0), 2)
