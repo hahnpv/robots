@@ -3,9 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="4534f14d-13e7-4c1c-baeb-a621842dcd09" name="Default" comment="">
       <change type="DELETED" beforePath="$PROJECT_DIR$/camshift.py" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/hist_backproject.py" afterPath="$PROJECT_DIR$/backproject.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/autonomy/vision/histogram.py" afterPath="$PROJECT_DIR$/autonomy/vision/histogram.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backproject.py" afterPath="$PROJECT_DIR$/backproject.py" />
     </list>
     <ignored path="opencv_testing.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -21,7 +21,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/opencv_testing$dewarp_img.coverage" NAME="dewarp_img Coverage Results" MODIFIED="1491235399188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/opencv_testing$camshift.coverage" NAME="camshift Coverage Results" MODIFIED="1493866516248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/opencv_testing$backproject.coverage" NAME="backproject Coverage Results" MODIFIED="1493868248569" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/opencv_testing$backproject.coverage" NAME="backproject Coverage Results" MODIFIED="1494091019204" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/opencv_testing$hist_backproject.coverage" NAME="hist_backproject Coverage Results" MODIFIED="1491023648600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/opencv_testing$denseopticalflow.coverage" NAME="denseopticalflow Coverage Results" MODIFIED="1491019371169" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
@@ -34,11 +34,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="backproject.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="backproject.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/backproject.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.31163436">
-              <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="124" column="19" selection-start-line="124" selection-start-column="19" selection-end-line="124" selection-end-column="19" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -46,11 +46,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="histogram.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="histogram.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/autonomy/vision/histogram.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="20" column="30" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+            <state vertical-scroll-proportion="0.5498615">
+              <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -107,8 +107,8 @@
         <option value="$PROJECT_DIR$/dewarp_img.py" />
         <option value="$PROJECT_DIR$/hist_backproject.py" />
         <option value="$PROJECT_DIR$/camshift.py" />
-        <option value="$PROJECT_DIR$/autonomy/vision/histogram.py" />
         <option value="$PROJECT_DIR$/backproject.py" />
+        <option value="$PROJECT_DIR$/autonomy/vision/histogram.py" />
       </list>
     </option>
   </component>
@@ -841,22 +841,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/autonomy/vision/histogram.py">
+    <entry file="file://$PROJECT_DIR$/backproject.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="20" column="30" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+          <caret line="124" column="19" selection-start-line="124" selection-start-column="19" selection-end-line="124" selection-end-column="19" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/backproject.py">
+    <entry file="file://$PROJECT_DIR$/autonomy/vision/histogram.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.31163436">
-          <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+        <state vertical-scroll-proportion="0.5498615">
+          <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

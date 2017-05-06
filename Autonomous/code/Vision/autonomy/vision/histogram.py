@@ -18,14 +18,15 @@ def histogram(img, mask, hsvComponents,hsvRanges,hsvMaxes):
 
 
 # histogram backprojection
+# TODO i think this is buggy!
 def backproject(hsvt,roihist, hsvComponents,hsvRanges):
     # backprojection method
     dst = cv2.calcBackProject([hsvt], hsvComponents, roihist, hsvRanges, 1)
-    # Now convolute with circular disc
+
+    # Now convolute with circular disc - WHy?
     disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     cv2.filter2D(dst, -1, disc, dst)
-    # threshold and binary AND
-#    cv2.imshow("unthresholded backprojection", dst)
-#    ret, thresh = cv2.threshold(dst, 128, 256, 0)                 # remove weak correlations
-#    cv2.imshow("thresholded backprojection", thresh)
-    return cv2.merge((dst, dst, dst))
+    dst = np.uint8(dst)
+    cv2.normalize(dst,dst,0,255,cv2.NORM_MINMAX)
+
+    return dst

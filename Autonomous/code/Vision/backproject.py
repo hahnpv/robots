@@ -7,13 +7,12 @@ from autonomy.util import io
 from autonomy.vision import histogram as hist
 
 # CONFIGURATION
-useCamshift = False
-hsvComponents = [0, 1]         # [0], [0, 1]
-hsvMaxes      = [180, 255]       # [180], [180, 255] TODO check this param and see what its for seems redundant
-hsvRanges     = [0, 180, 0, 255]    # [0, 180], [0, 180, 0, 255]
+useCamshift = True
+hsvComponents = [0]         # [0], [0, 1]
+hsvMaxes      = [180]       # [180], [180, 255] TODO check this param and see what its for seems redundant
+hsvRanges     = [0, 180]    # [0, 180], [0, 180, 0, 255]
 # Camshift termination criteria, either 10 iteration or move by atleast 1 pt
 term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
-
 
 # crib off of hist_finder for program structure
 # http://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_histograms/py_histogram_backprojection/py_histogram_backprojection.html#histogram-backprojection
@@ -22,7 +21,7 @@ term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
 cv2.namedWindow("image")
 cv2.setMouseCallback("image", io.rect_grab)
 
-my_camera = cv2.VideoCapture('C:/Users/phahn/Desktop/bodacious.mp4')
+my_camera = cv2.VideoCapture('C:/Users/phahn/Desktop/rumble.mp4')
 time.sleep(2)
 success, image = my_camera.read()
 refresh = True
@@ -81,27 +80,32 @@ while (True):
         with non-sufficient color saturation and too dark or too bright pixels.
         '''
 
-            # H S V
-        res = cv2.bitwise_and(img, thresh)
-        lower_range = np.array([0, 128,0])           # get rid of shiny things
-        upper_range = np.array([180, 256, 256])    # TODO make this a parameter and show red square on histogram to warn
-        hsv_res = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv_res, lower_range, upper_range)
-#        mask = cv2.dilate(mask, np.ones((20,20)))
-        res = cv2.bitwise_and(res, res, mask=mask)
-#        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, np.ones((5,5)))
-        cv2.imshow('backproject_val_threshold', res)
-
         if useCamshift:
             '''
-            something weird w/thresh?
+            Need to fix hist.backproject (returning 3 components always -> may be fucking up the else as well
+            Works with bright features but can get 'lost'. Can assess 'success' to verify.
             '''
+            thresh = cv2.calcBackProject([cv2.cvtColor(img,cv2.COLOR_BGR2HSV)], hsvComponents, roihist, hsvRanges, 1)
             success, track_window = cv2.CamShift(thresh, track_window, term_crit)
             # Draw it on image
             pts = cv2.boxPoints(success)
             print success
             pts = np.int0(pts)
             img2 = cv2.polylines(img, [pts], True, 255, 2)
+        else:
+            ret,thresh = cv2.threshold(thresh,50,255,0)
+            thresh = cv2.merge((thresh,thresh,thresh))
+
+                # H S V
+            res = cv2.bitwise_and(img, thresh)
+            lower_range = np.array([0, 128,0])           # get rid of shiny things
+            upper_range = np.array([180, 256, 256])    # TODO make this a parameter and show red square on histogram to warn
+            hsv_res = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
+            mask = cv2.inRange(hsv_res, lower_range, upper_range)
+    #        mask = cv2.dilate(mask, np.ones((20,20)))
+            res = cv2.bitwise_and(res, res, mask=mask)
+    #        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, np.ones((5,5)))
+            cv2.imshow('backproject_val_threshold', res)
 
     if io.mousing:
         cv2.rectangle(img, io.refPt, io.refEnd, (0, 255, 0), 2)
